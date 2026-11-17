@@ -1,0 +1,7 @@
+services:
+  app:
+    build: .
+    image: wildlife-track-corrector
+    ports:
+      - "8000:8000"
+    restart: unless-stopped

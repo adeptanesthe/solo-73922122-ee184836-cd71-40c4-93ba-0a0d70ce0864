@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>野生动物追踪串号校正与计数台</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <h1>野生动物追踪串号校正与计数台</h1>
+  <p class="subtitle">上传帧图与检测框 → 标记同只/异只 → 调整代价参数 → 求全局最优关联与动物计数</p>
+</header>
+
+<div id="layout">
+  <aside id="sidebar">
+    <section class="card">
+      <h2>1. 数据</h2>
+      <label class="file-label">帧图片（≤10，可多选）
+        <input type="file" id="img-input" accept="image/*" multiple>
+      </label>
+      <label class="file-label">检测 JSON（≤30 框）
+        <input type="file" id="json-input" accept=".json,application/json">
+      </label>
+      <div class="btn-row">
+        <button id="upload-btn">上传并创建会话</button>
+        <button id="example-btn" class="secondary">加载交叉遮挡示例</button>
+      </div>
+      <div id="session-info" class="muted">尚未创建会话。</div>
+    </section>
+
+    <section class="card">
+      <h2>3. 代价参数</h2>
+      <label class="param">距离权重 w<sub>dist</sub>（中心距离平方）
+        <input type="number" id="p-wdist" min="0" step="any" value="1">
+      </label>
+      <label class="param">外观权重 w<sub>app</sub>（1 − 余弦相似度）
+        <input type="number" id="p-wapp" min="0" step="any" value="10000">
+      </label>
+      <label class="param">每条新轨迹罚分
+        <input type="number" id="p-penalty" min="0" step="any" value="15000">
+      </label>
+      <div class="muted small">修改任一参数会立即撤下旧结果。</div>
+    </section>
+
+    <section class="card">
+      <h2>4. 全局最优求解</h2>
+      <button id="solve-btn" class="primary" disabled>计算最优关联</button>
+      <div id="solve-status" class="muted small">计算期间可继续修改判断与参数；若输入已变化，迟到的结果将自动作废，不会覆盖新输入。</div>
+    </section>
+  </aside>
+
+  <main>
+    <section class="card" id="viewer-card">
+      <h2>2. 按帧查看与标记</h2>
+      <div id="frame-nav">
+        <button id="prev-frame">◀ 上一帧</button>
+        <span id="frame-indicator">— / —</span>
+        <button id="next-frame">下一帧 ▶</button>
+        <span class="muted small">（← / → 键切换；点击两个框后可标记）</span>
+      </div>
+      <div id="canvas-wrap">
+        <canvas id="canvas" width="640" height="360"></canvas>
+        <div id="no-session" class="muted">请先上传数据或加载示例。</div>
+      </div>
+      <div id="selection-info" class="muted">未选择框。</div>
+      <div class="btn-row">
+        <button id="mark-same" disabled>标记为同只</button>
+        <button id="mark-diff" disabled>标记为异只</button>
+        <button id="mark-clear" disabled>清除该对判断</button>
+      </div>
+      <div id="judgment-panel">
+        <h3>当前身份判断 <span id="judgment-count" class="muted"></span></h3>
+        <ul id="judgment-list"></ul>
+      </div>
+    </section>
+
+    <section class="card" id="result-card">
+      <h2>结果</h2>
+      <div id="result-banner" class="banner muted">尚无结果。</div>
+      <div id="result-summary"></div>
+      <div id="trajectory-list"></div>
+    </section>
+  </main>
+</div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
